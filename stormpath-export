@@ -7,7 +7,7 @@ Easily export your Stormpath (https://stormpath.com/) user data.
 
 Usage:
   stormpath-export configure
-  stormpath-export [(<location> | -l <location> | --location <location>)]
+  stormpath-export [(<location> | -l <location> | --location <location>) (-b <base_url> | --base-url <base_url>)]
   stormpath-export [(-b <base_url> | --base-url <base_url>)]
   stormpath-export (-h | --help)
   stormpath-export --version
@@ -19,7 +19,7 @@ Options:
 Written by Randall Degges <http://www.rdegges.com/>.
 """
 
-
+from builtins import input
 from json import dumps, loads
 from os import chmod, getcwd, makedirs
 from os.path import dirname, exists, expanduser
@@ -32,7 +32,7 @@ from stormpath.error import Error
 
 ##### GLOBALS
 CONFIG_FILE = expanduser('~/.stormy')
-VERSION = 'stormpath-export 0.1.0'
+VERSION = 'stormpath-export 0.1.1'
 
 
 class StormpathExport(object):
@@ -40,16 +40,16 @@ class StormpathExport(object):
 
     EXPORTS = ['tenants', 'applications', 'directories', 'groups', 'organizations', 'accounts']
 
-    def __init__(self, base_url=None):
+    def __init__(self, base_url):
         """Initialize our Stormpath client, or die tryin' >:)"""
         if exists(CONFIG_FILE):
-            credentials = loads(open(CONFIG_FILE, 'rb').read())
+            credentials = loads(open(CONFIG_FILE, 'r').read())
             self.client = Client(api_key={
                 'id': credentials.get('stormpath_api_key_id'),
                 'secret': credentials.get('stormpath_api_key_secret'),
-            }, base_url=base_url or None)
+            }, base_url=credentials.get('stormpath_base_url') or base_url or None)
         else:
-            print 'No API credentials found!  Please run stormpath-export configure to set them up.'
+            print('No API credentials found! Please run stormpath-export configure to set them up.')
             exit(1)
 
     def get_custom_data(self, resource):
@@ -113,16 +113,16 @@ class StormpathExport(object):
         if not exists(dirname(file)):
             makedirs(dirname(file))
 
-        with open(file + '.json', 'wb') as file:
+        with open(file + '.json', 'w') as file:
             file.write(dumps(data, indent=2, separators=(',', ': '), sort_keys=True))
 
     def export_tenants(self):
         """Export all tenant data for this Stormpath account."""
-        print '\n=== Exporting all tenant data...'
+        print('\n=== Exporting all tenant data...')
 
         tenant = dict(self.client.tenant)
 
-        print '- Exporting tenant:', tenant['name']
+        print('- Exporting tenant:', tenant['name'])
 
         json = {
             'id': self.get_id(tenant),
@@ -138,14 +138,14 @@ class StormpathExport(object):
 
         self.write('%s/%s/meta' % (self.location, json['id']), json)
 
-        print '=== Done!\n'
+        print('=== Done!\n')
 
     def export_applications(self):
         """Export all application data for this Stormpath account."""
-        print '\n=== Exporting all application data...'
+        print('\n=== Exporting all application data...')
 
         for application in self.client.applications:
-            print '- Exporting application:', application.name
+            print('- Exporting application:', application.name)
 
             json = {
                 'id': self.get_id(application),
@@ -203,14 +203,14 @@ class StormpathExport(object):
             tenant = self.get_id(application.tenant)
             self.write('%s/%s/applications/%s' % (self.location, tenant, json['id']), json)
 
-        print '=== Done!\n'
+        print('=== Done!\n')
 
     def export_directories(self):
         """Export all directory data for this Stormpath account."""
-        print '=== Exporting all directory data...'
+        print('=== Exporting all directory data...')
 
         for directory in self.client.directories:
-            print '- Exporting directory:', directory.name
+            print('- Exporting directory:', directory.name)
 
             json = {
                 'id': self.get_id(directory),
@@ -357,14 +357,14 @@ class StormpathExport(object):
             tenant = self.get_id(directory.tenant)
             self.write('%s/%s/directories/%s' % (self.location, tenant, json['id']), json)
 
-        print '=== Done!\n'
+        print('=== Done!\n')
 
     def export_organizations(self):
         """Export all organization data for this Stormpath account."""
-        print '\n=== Exporting all organization data...'
+        print('\n=== Exporting all organization data...')
 
         for organization in self.client.organizations:
-            print '- Exporting organizations:', organization.name
+            print('- Exporting organizations:', organization.name)
 
             json = {
                 'id': self.get_id(organization),
@@ -422,14 +422,14 @@ class StormpathExport(object):
             tenant = self.get_id(organization.tenant)
             self.write('%s/%s/organizations/%s' % (self.location, tenant, json['id']), json)
 
-        print '=== Done!\n'
+        print('=== Done!\n')
 
     def export_groups(self):
         """Export all group data for this Stormpath account."""
-        print '=== Exporting all group data...'
+        print('=== Exporting all group data...')
 
         for group in self.client.tenant.groups:
-            print '- Exporting group:', group.name
+            print('- Exporting group:', group.name)
 
             json = {
                 'id': self.get_id(group),
@@ -470,14 +470,14 @@ class StormpathExport(object):
             tenant = self.get_id(self.client.tenant)
             self.write('%s/%s/groups/%s' % (self.location, tenant, json['id']), json)
 
-        print '=== Done!\n'
+        print('=== Done!\n')
 
     def export_accounts(self):
         """Export all account data for this Stormpath account."""
-        print '=== Exporting all account data...'
+        print('=== Exporting all account data...')
 
         for account in self.client.tenant.accounts:
-            print '- Exporting account:', account.email
+            print('- Exporting account:', account.email)
 
             json = {
                 'id': self.get_id(account),
@@ -528,7 +528,7 @@ class StormpathExport(object):
             tenant = self.get_id(self.client.tenant)
             self.write('%s/%s/accounts/%s' % (self.location, tenant, json['id']), json)
 
-        print '=== Done!\n'
+        print('=== Done!\n')
 
     def export(self, location=None):
         """
@@ -546,49 +546,51 @@ class StormpathExport(object):
             getattr(self, 'export_' + export_type)()
 
 
-def configure():
+def configure(base_url=None):
     """
     Initializing stormpath-export.
 
     This will store the user's API credentials in: ~/.stormy, and ensure the
     API credentials specified actually work.
     """
-    print 'Initializing `stormpath-export`...\n'
-    print "To get started, we'll need to get your Stormpath API credentials.  Don't have a Stormpath account?  Go get one!  https://stormpath.com/"
+    print('Initializing `stormpath-export`...\n')
+    print("To get started, we'll need to get your Stormpath API credentials.  Don't have a Stormpath account? Go get one! https://stormpath.com")
 
     finished = False
     while not finished:
-        api_key_id = raw_input('Enter your API Key ID: ').strip()
-        api_key_secret = raw_input('Enter your API Key Secret: ').strip()
+        api_key_id = input('Enter your API Key ID: ').strip()
+        api_key_secret = input('Enter your API Key Secret: ').strip()
+        base_url = input('Enter your Base URL (optional): ').strip()
         if not (api_key_id or api_key_secret):
-            print '\nNot sure how to find your Stormpath API credentials?'
-            print 'Log into your Stormpath account, then visit your dashboard and use the "Manage Existing Keys" link.\n'
+            print('\nNot sure how to find your Stormpath API credentials?')
+            print('Log into your Stormpath account, then visit your dashboard and use the "Manage Existing Keys" link.\n')
             continue
 
         # Validate the API credentials.
         client = Client(api_key={
             'id': api_key_id,
             'secret': api_key_secret,
-        })
+        }, base_url=base_url or None)
         try:
             client.applications
-            print '\nSuccessfully initialized stormy!'
-            print 'Your API credentials are stored in the file:', CONFIG_FILE, '\n'
-            print 'Run stormpath-export  for usage information.'
+            print('\nSuccessfully initialized stormy!')
+            print('Your API credentials are stored in the file:', CONFIG_FILE, '\n')
+            print('Run stormpath-export for usage information.')
 
-            with open(CONFIG_FILE, 'wb') as stormycfg:
+            with open(CONFIG_FILE, 'w') as stormycfg:
                 stormycfg.write(dumps({
                     'stormpath_api_key_id': api_key_id,
                     'stormpath_api_key_secret': api_key_secret,
+                    'stormpath_base_url': base_url or None
                 }, indent=2, sort_keys=True))
 
             # Make the stormy configuration file only accessible to the current
             # user -- this makes the credentials a bit more safe.
-            chmod(CONFIG_FILE, 0600)
+            chmod(CONFIG_FILE, 0o600)
 
             finished = True
         except Error:
-            print '\nYour API credentials are not working, please verify they are correct, then try again.\n'
+            print('\nYour API credentials are not working, please verify they are correct, then try again.\n')
 
 
 def main():
@@ -598,10 +600,10 @@ def main():
     # Handle the configure as a special case -- this way we won't get invalid
     # API credential messages when we're trying to configure stormpath-export.
     if arguments['configure']:
-        configure()
+        configure(base_url=arguments['<base_url>'])
         return
 
-    exporter = StormpathExport(base_url=arguments['<base_url>'])
+    exporter = StormpathExport(arguments['<base_url>'])
     exporter.export(arguments['<location>'])
 
 

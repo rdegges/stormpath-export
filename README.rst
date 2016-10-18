@@ -85,6 +85,10 @@ simply run:
 This will prompt you for some basic information, then store your credentials
 in the local file ``~/.stormy``.
 
+NOTE: If you are using Stormpath Enterprise, please enter
+``https://enterprise.stormpath.io/v1`` when prompted for the Base URL.  This
+instructs the export tool to talk to the Stormpath Enterprise environment.
+
 Next, to initiate a backup job, you can run:
 
 .. code-block:: console
@@ -161,6 +165,11 @@ Otherwise, `shoot us an email`_.
 
 Changelog
 ---------
+
+**0.1.1**: 10-17-2016
+
+- Supporting ``--base-url`` argument.
+- Making the tool Python 3 compatible.
 
 **0.1.0**: 03-16-2016
 
