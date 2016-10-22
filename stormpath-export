@@ -7,8 +7,8 @@ Easily export your Stormpath (https://stormpath.com/) user data.
 
 Usage:
   stormpath-export configure
-  stormpath-export [(<location> | -l <location> | --location <location>) (-b <base_url> | --base-url <base_url>)]
-  stormpath-export [(-b <base_url> | --base-url <base_url>)]
+  stormpath-export [(<location> | -l <location> | --location <location>)]
+  stormpath-export [(<api_key_id> <api_key_secret>) [(<base_url>)]]
   stormpath-export (-h | --help)
   stormpath-export --version
 
@@ -32,7 +32,7 @@ from stormpath.error import Error
 
 ##### GLOBALS
 CONFIG_FILE = expanduser('~/.stormy')
-VERSION = 'stormpath-export 0.1.1'
+VERSION = 'stormpath-export 0.1.2'
 
 
 class StormpathExport(object):
@@ -40,14 +40,19 @@ class StormpathExport(object):
 
     EXPORTS = ['tenants', 'applications', 'directories', 'groups', 'organizations', 'accounts']
 
-    def __init__(self, base_url):
+    def __init__(self, stormpath_api_key_id=None, stormpath_api_key_secret=None, stormpath_base_url=None):
         """Initialize our Stormpath client, or die tryin' >:)"""
         if exists(CONFIG_FILE):
             credentials = loads(open(CONFIG_FILE, 'r').read())
             self.client = Client(api_key={
                 'id': credentials.get('stormpath_api_key_id'),
                 'secret': credentials.get('stormpath_api_key_secret'),
-            }, base_url=credentials.get('stormpath_base_url') or base_url or None)
+            }, base_url=credentials.get('stormpath_base_url') or None)
+        elif stormpath_api_key_id and stormpath_api_key_secret:
+            self.client = Client(api_key={
+                'id': stormpath_api_key_id,
+                'secret': stormpath_api_key_secret,
+            }, base_url=stormpath_base_url or None)
         else:
             print('No API credentials found! Please run stormpath-export configure to set them up.')
             exit(1)
@@ -546,7 +551,7 @@ class StormpathExport(object):
             getattr(self, 'export_' + export_type)()
 
 
-def configure(base_url=None):
+def configure():
     """
     Initializing stormpath-export.
 
@@ -600,10 +605,10 @@ def main():
     # Handle the configure as a special case -- this way we won't get invalid
     # API credential messages when we're trying to configure stormpath-export.
     if arguments['configure']:
-        configure(base_url=arguments['<base_url>'])
+        configure()
         return
 
-    exporter = StormpathExport(arguments['<base_url>'])
+    exporter = StormpathExport(arguments['<api_key_id>'],arguments['<api_key_secret>'],arguments['<base_url>'])
     exporter.export(arguments['<location>'])
 
 
