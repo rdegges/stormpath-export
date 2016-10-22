@@ -76,7 +76,9 @@ Usage
 
 Before you can export all your `Stormpath`_ data, you'll need to configure
 ``stormpath-export`` and give it your Stormpath API credentials. To do this,
-simply run:
+you have two options.
+
+1) To save your credentials locally, simply run:
 
 .. code-block:: console
 
@@ -86,8 +88,17 @@ This will prompt you for some basic information, then store your credentials
 in the local file ``~/.stormy``.
 
 NOTE: If you are using Stormpath Enterprise, please enter
-``https://enterprise.stormpath.io/v1`` when prompted for the Base URL.  This
+``https://enterprise.stormpath.io/v1`` when prompted for the Base URL. This
 instructs the export tool to talk to the Stormpath Enterprise environment.
+
+2) To specify your credentials for one-time use, simply run:
+
+.. code-block:: console
+
+    $ stormpath-export $STORMPATH_API_KEY_ID $STORMPATH_API_KEY_SECRET $BASE_URL
+
+NOTE: $BASE_URL is an optional argument. If you don't enter a Base URL, we will
+automatically try to authenticate against ``https://api.stormpath.com/v1``.
 
 Next, to initiate a backup job, you can run:
 
@@ -144,6 +155,7 @@ For full usage information, run ``stormpath-export -h``:
     Usage:
       stormpath-export configure
       stormpath-export [(<location> | -l <location> | --location <location>)]
+      stormpath-export [(<stormpath_api_key_id> <stormpath_api_key_secret>) [(<stormpath_base_url>)]]
       stormpath-export (-h | --help)
       stormpath-export --version
 

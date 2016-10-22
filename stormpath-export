@@ -8,7 +8,7 @@ Easily export your Stormpath (https://stormpath.com/) user data.
 Usage:
   stormpath-export configure
   stormpath-export [(<location> | -l <location> | --location <location>)]
-  stormpath-export [(<api_key_id> <api_key_secret>) [(<base_url>)]]
+  stormpath-export [(<stormpath_api_key_id> <stormpath_api_key_secret>) [(<stormpath_base_url>)]]
   stormpath-export (-h | --help)
   stormpath-export --version
 
@@ -608,7 +608,7 @@ def main():
         configure()
         return
 
-    exporter = StormpathExport(arguments['<api_key_id>'],arguments['<api_key_secret>'],arguments['<base_url>'])
+    exporter = StormpathExport(arguments['<stormpath_api_key_id>'],arguments['<stormpath_api_key_secret>'],arguments['<stormpath_base_url>'])
     exporter.export(arguments['<location>'])
 
 
