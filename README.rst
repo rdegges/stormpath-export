@@ -178,6 +178,10 @@ Otherwise, `shoot us an email`_.
 Changelog
 ---------
 
+**0.1.2**: 10-23-2016
+
+- Supporting ``api_key_id`` ``api_key_secret`` and ``base_url`` arguments for one-time use.
+
 **0.1.1**: 10-17-2016
 
 - Supporting ``--base-url`` argument.
